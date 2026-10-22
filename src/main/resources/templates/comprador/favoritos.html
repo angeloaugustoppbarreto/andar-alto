@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Meus favoritos')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('favoritos')}"></header>
+
+<main id="conteudo">
+    <div th:replace="~{fragments/layout :: avisos}"></div>
+
+    <div class="container painel">
+        <div class="painel-cabecalho">
+            <div>
+                <h1>Meus favoritos</h1>
+                <p>Os apartamentos que você salvou para comparar com calma.</p>
+            </div>
+        </div>
+
+        <div class="grade-imoveis" th:if="${!apartamentos.isEmpty()}">
+            <th:block th:each="a : ${apartamentos}">
+                <article th:replace="~{fragments/layout :: cartao(${a})}"></article>
+            </th:block>
+        </div>
+
+        <div class="vazio" th:if="${apartamentos.isEmpty()}">
+            <h2>Nenhum favorito ainda</h2>
+            <p>Clique no coração de um apartamento para guardá-lo aqui.</p>
+            <a class="btn btn-primario" th:href="@{/apartamentos}">Buscar apartamentos</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

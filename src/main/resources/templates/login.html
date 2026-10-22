@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Entrar')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('login')}"></header>
+
+<main id="conteudo" class="container cartao-acesso">
+    <div class="formulario-bloco">
+        <h1>Entrar</h1>
+        <p class="suave">Acesse sua conta de comprador, vendedor ou administrador.</p>
+
+        <!-- Aviso do cadastro concluído (flash) e do login recusado (?erro). -->
+        <p class="aviso aviso-sucesso" role="status" th:if="${sucesso != null}" th:text="${sucesso}">Conta criada.</p>
+        <p class="aviso aviso-erro" role="alert" th:if="${param.erro != null}">
+            E-mail ou senha incorretos, ou conta desativada.
+        </p>
+
+        <!-- Os nomes dos campos (email e senha) combinam com o SecurityConfig. -->
+        <form th:action="@{/login}" method="post" style="margin-top:1.25rem">
+            <div class="campo">
+                <label for="email">E-mail</label>
+                <input class="controle" id="email" name="email" type="email" autocomplete="username" required autofocus>
+            </div>
+            <div class="campo">
+                <label for="senha">Senha</label>
+                <input class="controle" id="senha" name="senha" type="password" autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="btn btn-primario btn-bloco">Entrar</button>
+        </form>
+
+        <p class="rodape-form">Ainda não tem conta? <a th:href="@{/cadastro}">Criar conta</a></p>
+
+        <!-- Só aparece com app.demo.dados=true: contas FICTÍCIAS para testar cada perfil. -->
+        <details th:if="${modoDemo}" style="margin-top:1.25rem">
+            <summary><strong>Contas de demonstração</strong></summary>
+            <div class="tabela-rolagem">
+                <table class="tabela" style="margin-top:0.5rem">
+                    <thead><tr><th>Perfil</th><th>E-mail</th></tr></thead>
+                    <tbody>
+                    <tr><td>Comprador</td><td>ana@andaralto.demo</td></tr>
+                    <tr><td>Comprador</td><td>bruno@andaralto.demo</td></tr>
+                    <tr><td>Vendedor</td><td>carla@andaralto.demo</td></tr>
+                    <tr><td>Vendedor</td><td>roberto@andaralto.demo</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="ajuda">Senha de todas as contas acima: <code>demo123</code>. O administrador usa o e-mail e a senha
+                definidos em <code>application.properties</code>.</p>
+        </details>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

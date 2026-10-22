@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Minhas vendas')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('vendas')}"></header>
+
+<main id="conteudo">
+    <div th:replace="~{fragments/layout :: avisos}"></div>
+
+    <div class="container painel">
+        <div class="painel-cabecalho">
+            <div>
+                <h1>Minhas vendas</h1>
+                <p>Negócios concluídos, com a comissão da plataforma de cada venda.</p>
+            </div>
+        </div>
+
+        <th:block th:if="${!vendas.isEmpty()}">
+            <div class="numeros">
+                <div class="numero"><b th:text="${vendas.size()}">1</b><span th:text="${vendas.size() == 1} ? 'venda concluída' : 'vendas concluídas'">vendas concluídas</span></div>
+                <div class="numero"><b class="sem-quebra" th:text="${@fmt.moeda(#aggregates.sum(vendas.![valorFinal]))}">R$ 0</b><span>total vendido</span></div>
+                <div class="numero"><b class="sem-quebra" th:text="${@fmt.moedaComCentavos(#aggregates.sum(vendas.![comissaoValor]))}">R$ 0,00</b><span>em comissões</span></div>
+            </div>
+
+            <section class="bloco">
+                <div class="tabela-rolagem">
+                    <table class="tabela">
+                        <caption class="sr-only">Vendas concluídas</caption>
+                        <thead>
+                        <tr>
+                            <th>Apartamento</th>
+                            <th>Comprador</th>
+                            <th class="num">Valor final</th>
+                            <th class="num">Comissão</th>
+                            <th>Vendido em</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="v : ${vendas}">
+                            <td>
+                                <a class="titulo-linha" th:href="@{/apartamentos/{id}(id=${v.apartamento.id})}"
+                                   th:text="${v.apartamento.titulo}">Título</a>
+                                <div class="discreto" th:text="${v.apartamento.localizacao}">Boa Viagem, Recife - PE</div>
+                            </td>
+                            <td>
+                                <strong th:text="${v.comprador.nome}">Ana Souza</strong>
+                                <div class="discreto" th:text="${v.comprador.email}">ana@exemplo.com</div>
+                            </td>
+                            <td class="num sem-quebra"><strong th:text="${@fmt.moeda(v.valorFinal)}">R$ 850.000</strong></td>
+                            <td class="num sem-quebra">
+                                <span th:text="${@fmt.moedaComCentavos(v.comissaoValor)}">R$ 17.000,00</span>
+                                <div class="discreto" th:text="${@fmt.percentual(v.comissaoPercentual)}">2,0%</div>
+                            </td>
+                            <td class="sem-quebra" th:text="${@fmt.data(v.vendidoEm)}">01/10/2026</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </th:block>
+
+        <div class="vazio" th:if="${vendas.isEmpty()}">
+            <h2>Nenhuma venda concluída ainda</h2>
+            <p>Aceite uma proposta e, quando o negócio fechar, use “Concluir venda” em Meus anúncios.</p>
+            <a class="btn btn-primario" th:href="@{/vendedor/propostas}">Ver propostas</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

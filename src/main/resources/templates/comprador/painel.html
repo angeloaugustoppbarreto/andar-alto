@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Painel do comprador')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('painel')}"></header>
+
+<main id="conteudo">
+    <div th:replace="~{fragments/layout :: avisos}"></div>
+
+    <div class="container painel">
+        <div class="painel-cabecalho">
+            <div>
+                <h1>Olá, <span th:text="${usuarioLogado.primeiroNome}">Ana</span></h1>
+                <p>Acompanhe seus favoritos e o andamento das suas propostas.</p>
+            </div>
+            <a class="btn btn-primario" th:href="@{/apartamentos}">Buscar apartamentos</a>
+        </div>
+
+        <div class="numeros">
+            <div class="numero"><b th:text="${painel.favoritos}">0</b><span>favoritos salvos</span></div>
+            <div class="numero" th:classappend="${painel.propostasPendentes > 0} ? 'alerta'">
+                <b th:text="${painel.propostasPendentes}">0</b><span>propostas aguardando resposta</span>
+            </div>
+            <div class="numero" th:classappend="${painel.propostasAceitas > 0} ? 'alerta'">
+                <b th:text="${painel.propostasAceitas}">0</b><span>propostas aceitas</span>
+            </div>
+        </div>
+
+        <section class="bloco" aria-labelledby="ultimas">
+            <div class="bloco-cabecalho">
+                <h2 id="ultimas">Últimas propostas</h2>
+                <a th:href="@{/comprador/propostas}">Ver todas</a>
+            </div>
+
+            <div class="tabela-rolagem" th:if="${!painel.ultimasPropostas.isEmpty()}">
+                <table class="tabela">
+                    <thead>
+                    <tr><th>Apartamento</th><th class="num">Sua oferta</th><th>Situação</th><th>Enviada em</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="p : ${painel.ultimasPropostas}">
+                        <td><a class="titulo-linha" th:href="@{/apartamentos/{id}(id=${p.apartamento.id})}"
+                               th:text="${p.apartamento.titulo}">Título</a></td>
+                        <td class="num sem-quebra" th:text="${@fmt.moeda(p.valorOfertado)}">R$ 850.000</td>
+                        <td><span th:replace="~{fragments/layout :: selo(${p.status})}"></span></td>
+                        <td class="sem-quebra" th:text="${@fmt.data(p.criadoEm)}">01/10/2026</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="bloco-corpo" th:if="${painel.ultimasPropostas.isEmpty()}">
+                <p class="suave" style="margin:0">Você ainda não enviou propostas. Abra um apartamento e clique em
+                    “Enviar proposta”.</p>
+            </div>
+        </section>
+
+        <div class="acoes">
+            <a class="btn btn-secundario" th:href="@{/comprador/favoritos}">Meus favoritos</a>
+            <a class="btn btn-secundario" th:href="@{/comprador/propostas}">Todas as propostas</a>
+            <a class="btn btn-secundario" th:href="@{/conta}">Minha conta</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Painel do vendedor')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('painel')}"></header>
+
+<main id="conteudo">
+    <div th:replace="~{fragments/layout :: avisos}"></div>
+
+    <div class="container painel">
+        <div class="painel-cabecalho">
+            <div>
+                <h1>Olá, <span th:text="${usuarioLogado.primeiroNome}">Carla</span></h1>
+                <p>Seus anúncios, propostas e vendas em um só lugar.</p>
+            </div>
+            <a class="btn btn-primario" th:href="@{/vendedor/anuncios/novo}">Novo anúncio</a>
+        </div>
+
+        <div class="numeros">
+            <div class="numero"><b th:text="${painel.totalAnuncios}">0</b><span>anúncios</span></div>
+            <div class="numero" th:classappend="${painel.propostasPendentes > 0} ? 'alerta'">
+                <b th:text="${painel.propostasPendentes}">0</b><span>propostas para responder</span>
+            </div>
+            <div class="numero"><b th:text="${painel.vendas}">0</b><span>vendas concluídas</span></div>
+            <div class="numero"><b class="sem-quebra" th:text="${@fmt.moeda(painel.totalVendido)}">R$ 0</b><span>total vendido</span></div>
+        </div>
+
+        <!-- Quantos anúncios há em cada situação (só as que têm algum). -->
+        <section class="bloco" aria-labelledby="situacoes" th:if="${painel.totalAnuncios > 0}">
+            <div class="bloco-cabecalho">
+                <h2 id="situacoes">Anúncios por situação</h2>
+                <a th:href="@{/vendedor/anuncios}">Gerenciar anúncios</a>
+            </div>
+            <div class="bloco-corpo">
+                <div class="acoes">
+                    <th:block th:each="e : ${painel.anunciosPorStatus}">
+                        <span th:if="${e.value > 0}" style="display:inline-flex;gap:0.4rem;align-items:center">
+                            <span th:replace="~{fragments/layout :: selo(${e.key})}"></span>
+                            <strong class="num" th:text="${e.value}">2</strong>
+                        </span>
+                    </th:block>
+                </div>
+            </div>
+        </section>
+
+        <section class="bloco" aria-labelledby="pendentes">
+            <div class="bloco-cabecalho">
+                <h2 id="pendentes">Propostas aguardando sua resposta</h2>
+                <a th:href="@{/vendedor/propostas}">Ver todas</a>
+            </div>
+
+            <div class="tabela-rolagem" th:if="${!painel.propostasPendentesLista.isEmpty()}">
+                <table class="tabela">
+                    <thead>
+                    <tr><th>Apartamento</th><th>Comprador</th><th class="num">Oferta</th><th>Mensagem</th><th><span class="sr-only">Ações</span></th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="p : ${painel.propostasPendentesLista}">
+                        <td>
+                            <a class="titulo-linha" th:href="@{/apartamentos/{id}(id=${p.apartamento.id})}"
+                               th:text="${p.apartamento.titulo}">Título</a>
+                            <div class="discreto">Preço anunciado: <span th:text="${@fmt.moeda(p.apartamento.preco)}">R$ 890.000</span></div>
+                        </td>
+                        <td th:text="${p.comprador.nome}">Ana Souza</td>
+                        <td class="num"><div th:replace="~{fragments/propostas :: oferta(${p})}"></div></td>
+                        <td><span class="nota" th:text="${p.mensagem != null} ? ${p.mensagem} : '—'">Mensagem</span></td>
+                        <td><div th:replace="~{fragments/propostas :: acoes(${p})}"></div></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="bloco-corpo" th:if="${painel.propostasPendentesLista.isEmpty()}">
+                <p class="suave" style="margin:0">Nenhuma proposta esperando resposta. Quando um comprador fizer uma oferta, ela aparece aqui.</p>
+            </div>
+        </section>
+
+        <div class="acoes">
+            <a class="btn btn-secundario" th:href="@{/vendedor/anuncios}">Meus anúncios</a>
+            <a class="btn btn-secundario" th:href="@{/vendedor/vendas}">Minhas vendas</a>
+            <a class="btn btn-secundario" th:href="@{/conta}">Minha conta</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

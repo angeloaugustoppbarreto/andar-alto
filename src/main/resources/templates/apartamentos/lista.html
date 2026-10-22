@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Buscar apartamentos')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('comprar')}"></header>
+
+<main id="conteudo">
+    <div th:replace="~{fragments/layout :: avisos}"></div>
+
+    <div class="container pagina-cabecalho">
+        <h1>Apartamentos à venda</h1>
+        <p>
+            <span class="num" th:text="${resultado.totalElements}">9</span>
+            <span th:text="${resultado.totalElements == 1} ? 'resultado' : 'resultados'">resultados</span>
+            <span th:if="${filtro.ativo}">com os filtros escolhidos</span>
+        </p>
+    </div>
+
+    <div class="container busca-layout">
+        <!-- ========================================================= filtros -->
+        <!-- Formulário GET: os filtros viram parâmetros na URL (?cidade=Recife&quartos=2) e dá para compartilhar o link. -->
+        <form class="filtros" th:action="@{/apartamentos}" method="get" role="search">
+            <h2>Filtrar</h2>
+
+            <div class="campo">
+                <label for="f-q">Bairro, rua ou palavra</label>
+                <input class="controle" id="f-q" type="search" name="q" th:value="${filtro.q}" placeholder="Ex.: Boa Viagem">
+            </div>
+
+            <div class="campo">
+                <label for="f-cidade">Cidade</label>
+                <select class="controle" id="f-cidade" name="cidade">
+                    <option value="">Todas</option>
+                    <option th:each="c : ${cidades}" th:value="${c}" th:text="${c}"
+                            th:selected="${filtro.cidade != null and filtro.cidade.equalsIgnoreCase(c)}">Recife</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <span class="rotulo">Preço (R$)</span>
+                <div class="duplo">
+                    <input class="controle" type="number" name="precoMin" min="0" step="1000" placeholder="Mínimo"
+                           aria-label="Preço mínimo" th:value="${filtro.precoMin}">
+                    <input class="controle" type="number" name="precoMax" min="0" step="1000" placeholder="Máximo"
+                           aria-label="Preço máximo" th:value="${filtro.precoMax}">
+                </div>
+            </div>
+
+            <div class="campo">
+                <label for="f-quartos">Quartos</label>
+                <select class="controle" id="f-quartos" name="quartos">
+                    <option value="">Qualquer</option>
+                    <option th:each="n : ${#numbers.sequence(1, 4)}" th:value="${n}" th:text="${n} + ' ou mais'"
+                            th:selected="${filtro.quartos != null and filtro.quartos == n}">1 ou mais</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="f-vagas">Vagas de garagem</label>
+                <select class="controle" id="f-vagas" name="vagas">
+                    <option value="">Qualquer</option>
+                    <option th:each="n : ${#numbers.sequence(1, 3)}" th:value="${n}" th:text="${n} + ' ou mais'"
+                            th:selected="${filtro.vagas != null and filtro.vagas == n}">1 ou mais</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="f-ordem">Ordenar por</label>
+                <select class="controle" id="f-ordem" name="ordem">
+                    <option value="">Destaques e mais recentes</option>
+                    <option value="menor-preco" th:selected="${filtro.ordem == 'menor-preco'}">Menor preço</option>
+                    <option value="maior-preco" th:selected="${filtro.ordem == 'maior-preco'}">Maior preço</option>
+                    <option value="maior-area" th:selected="${filtro.ordem == 'maior-area'}">Maior área</option>
+                </select>
+            </div>
+
+            <div class="acoes">
+                <button type="submit" class="btn btn-primario">Aplicar filtros</button>
+                <a class="btn btn-secundario" th:if="${filtro.ativo}" th:href="@{/apartamentos}">Limpar</a>
+            </div>
+        </form>
+
+        <!-- ========================================================= resultados -->
+        <section aria-label="Resultados da busca">
+            <div class="grade-imoveis" th:if="${resultado.hasContent()}">
+                <th:block th:each="a : ${resultado.content}">
+                    <article th:replace="~{fragments/layout :: cartao(${a})}"></article>
+                </th:block>
+            </div>
+
+            <div class="vazio" th:unless="${resultado.hasContent()}">
+                <h2>Nenhum apartamento encontrado</h2>
+                <p>Tente ampliar o preço, reduzir o número de quartos ou escolher outra cidade.</p>
+                <a class="btn btn-primario" th:href="@{/apartamentos}">Ver todos os apartamentos</a>
+            </div>
+
+            <!-- Paginação: os links levam os filtros junto (filtro.queryString já vem codificado e terminado em "&"). -->
+            <nav class="paginacao" aria-label="Páginas de resultados" th:if="${resultado.totalPages > 1}">
+                <a th:if="${resultado.hasPrevious()}"
+                   th:href="@{|/apartamentos?${filtro.queryString}pagina=${resultado.number}|}">&larr; Anterior</a>
+
+                <th:block th:each="n : ${#numbers.sequence(1, resultado.totalPages)}">
+                    <span class="atual" th:if="${n == resultado.number + 1}" aria-current="page" th:text="${n}">1</span>
+                    <a th:unless="${n == resultado.number + 1}"
+                       th:href="@{|/apartamentos?${filtro.queryString}pagina=${n}|}" th:text="${n}">2</a>
+                </th:block>
+
+                <a th:if="${resultado.hasNext()}"
+                   th:href="@{|/apartamentos?${filtro.queryString}pagina=${resultado.number + 2}|}">Próxima &rarr;</a>
+            </nav>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

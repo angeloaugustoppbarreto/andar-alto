@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Minha conta')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('conta')}"></header>
+
+<main id="conteudo">
+    <div th:replace="~{fragments/layout :: avisos}"></div>
+
+    <div class="container painel">
+        <div class="painel-cabecalho">
+            <div>
+                <h1>Minha conta</h1>
+                <p>
+                    <span th:text="${conta.perfil.rotulo}">Comprador</span> ·
+                    cliente desde <span th:text="${@fmt.data(conta.criadoEm)}">01/10/2026</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="medio">
+            <!-- ============================================ dados pessoais -->
+            <form class="formulario-bloco" th:action="@{/conta}" th:object="${contaForm}" method="post" novalidate>
+                <h2>Meus dados</h2>
+
+                <div class="campo">
+                    <label for="email-conta">E-mail</label>
+                    <input class="controle" id="email-conta" type="email" th:value="${conta.email}" readonly aria-describedby="ajuda-email">
+                    <p class="ajuda" id="ajuda-email">O e-mail é o seu login e não pode ser alterado.</p>
+                </div>
+
+                <div class="grade-form">
+                    <div class="campo">
+                        <label for="nome">Nome</label>
+                        <input class="controle" id="nome" type="text" th:field="*{nome}" th:errorclass="invalido" maxlength="120" required>
+                        <span class="erro-campo" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}">Erro</span>
+                    </div>
+                    <div class="campo">
+                        <label for="telefone">Telefone <span class="opcional">(opcional)</span></label>
+                        <input class="controle" id="telefone" type="tel" th:field="*{telefone}" th:errorclass="invalido">
+                        <span class="erro-campo" th:if="${#fields.hasErrors('telefone')}" th:errors="*{telefone}">Erro</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primario">Salvar dados</button>
+            </form>
+
+            <!-- ============================================ troca de senha -->
+            <form class="formulario-bloco" th:action="@{/conta/senha}" th:object="${senhaForm}" method="post" novalidate>
+                <h2>Alterar senha</h2>
+
+                <div class="campo">
+                    <label for="senhaAtual">Senha atual</label>
+                    <input class="controle" id="senhaAtual" type="password" th:field="*{senhaAtual}" th:errorclass="invalido"
+                           autocomplete="current-password" required>
+                    <span class="erro-campo" th:if="${#fields.hasErrors('senhaAtual')}" th:errors="*{senhaAtual}">Erro</span>
+                </div>
+
+                <div class="grade-form">
+                    <div class="campo">
+                        <label for="novaSenha">Nova senha</label>
+                        <input class="controle" id="novaSenha" type="password" th:field="*{novaSenha}" th:errorclass="invalido"
+                               autocomplete="new-password" minlength="6" maxlength="60" required>
+                        <span class="erro-campo" th:if="${#fields.hasErrors('novaSenha')}" th:errors="*{novaSenha}">Erro</span>
+                    </div>
+                    <div class="campo">
+                        <label for="confirmacao">Repita a nova senha</label>
+                        <input class="controle" id="confirmacao" type="password" th:field="*{confirmacao}" th:errorclass="invalido"
+                               autocomplete="new-password" required>
+                        <span class="erro-campo" th:if="${#fields.hasErrors('confirmacao')}" th:errors="*{confirmacao}">Erro</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-secundario">Alterar senha</button>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

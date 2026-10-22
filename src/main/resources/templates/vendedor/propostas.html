@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Propostas recebidas')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('propostas')}"></header>
+
+<main id="conteudo">
+    <div th:replace="~{fragments/layout :: avisos}"></div>
+
+    <div class="container painel">
+        <div class="painel-cabecalho">
+            <div>
+                <h1>Propostas recebidas</h1>
+                <p>Ao aceitar uma proposta, o apartamento fica reservado e as demais pendentes são recusadas.</p>
+            </div>
+        </div>
+
+        <section class="bloco" th:if="${!propostas.isEmpty()}">
+            <div class="tabela-rolagem">
+                <table class="tabela">
+                    <caption class="sr-only">Propostas recebidas nos seus anúncios</caption>
+                    <thead>
+                    <tr>
+                        <th>Apartamento</th>
+                        <th>Comprador</th>
+                        <th class="num">Oferta</th>
+                        <th>Situação</th>
+                        <th>Recebida em</th>
+                        <th><span class="sr-only">Ações</span></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="p : ${propostas}">
+                        <td>
+                            <a class="titulo-linha" th:href="@{/apartamentos/{id}(id=${p.apartamento.id})}"
+                               th:text="${p.apartamento.titulo}">Título</a>
+                            <div class="discreto">
+                                Preço anunciado: <span th:text="${@fmt.moeda(p.apartamento.preco)}">R$ 890.000</span>
+                            </div>
+                        </td>
+                        <td>
+                            <strong th:text="${p.comprador.nome}">Ana Souza</strong>
+                            <!-- O contato do comprador só é liberado depois que a proposta é aceita. -->
+                            <div class="discreto" th:if="${p.aceita}">
+                                <div th:text="${p.comprador.email}">ana@exemplo.com</div>
+                                <div th:if="${p.comprador.telefone != null}" th:text="${p.comprador.telefone}">(81) 90000-0000</div>
+                            </div>
+                            <p class="nota" th:if="${p.mensagem != null}">“<span th:text="${p.mensagem}">mensagem</span>”</p>
+                        </td>
+                        <td class="num"><div th:replace="~{fragments/propostas :: oferta(${p})}"></div></td>
+                        <td>
+                            <span th:replace="~{fragments/layout :: selo(${p.status})}"></span>
+                            <p class="nota" th:if="${p.resposta != null}" th:text="${p.resposta}">Resposta enviada</p>
+                        </td>
+                        <td class="sem-quebra" th:text="${@fmt.data(p.criadoEm)}">01/10/2026</td>
+                        <td>
+                            <!-- th:if e th:replace no mesmo elemento: o replace vence e ignora o if. Por isso o th:block. -->
+                            <th:block th:if="${p.pendente and p.apartamento.status.name() == 'PUBLICADO'}">
+                                <div th:replace="~{fragments/propostas :: acoes(${p})}"></div>
+                            </th:block>
+                            <!-- Proposta aceita: o fechamento acontece em "Meus anúncios". -->
+                            <a class="btn btn-secundario btn-sm"
+                               th:if="${p.aceita and p.apartamento.status.name() == 'RESERVADO'}"
+                               th:href="@{/vendedor/anuncios}">Concluir em “Meus anúncios”</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div class="vazio" th:if="${propostas.isEmpty()}">
+            <h2>Nenhuma proposta recebida</h2>
+            <p>Quando um comprador fizer uma oferta por um dos seus apartamentos, ela aparece aqui.</p>
+            <a class="btn btn-primario" th:href="@{/vendedor/anuncios}">Ver meus anúncios</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

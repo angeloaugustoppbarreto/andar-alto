@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${apartamento.titulo})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('comprar')}"></header>
+
+<main id="conteudo"
+      th:with="status=${apartamento.status.name()},
+               ehDono=${usuarioLogado != null and usuarioLogado.vendedor and apartamento.vendedor.id == usuarioLogado.id}">
+    <div th:replace="~{fragments/layout :: avisos}"></div>
+
+    <article class="container detalhe">
+        <nav class="migalhas" aria-label="Você está em">
+            <a th:href="@{/}">Início</a> /
+            <a th:href="@{/apartamentos}">Apartamentos</a> /
+            <a th:href="@{/apartamentos(cidade=${apartamento.cidade})}" th:text="${apartamento.cidade}">Recife</a>
+        </nav>
+
+        <!-- Quem vê anúncios que não estão na vitrine (dono e administração) recebe um aviso do que está acontecendo. -->
+        <div class="aviso aviso-atencao" role="status" th:if="${status == 'EM_ANALISE'}">
+            Este anúncio está <strong>em análise</strong>. Só você e a administração conseguem vê-lo até a aprovação.
+        </div>
+        <div class="aviso aviso-erro" role="status" th:if="${status == 'REJEITADO'}">
+            Anúncio <strong>rejeitado</strong> pela administração.
+            <span th:if="${apartamento.motivoRejeicao != null}">Motivo: <span th:text="${apartamento.motivoRejeicao}">motivo</span></span>
+        </div>
+        <div class="aviso aviso-atencao" role="status" th:if="${status == 'PAUSADO'}">
+            Este anúncio está <strong>pausado</strong> e não aparece na vitrine.
+        </div>
+
+        <div class="detalhe-grade">
+            <!-- ================================================= coluna principal -->
+            <div>
+                <div class="galeria">
+                    <div class="galeria-principal">
+                        <img id="galeria-principal" th:src="@{${apartamento.capaUrl}}"
+                             th:alt="${apartamento.imagens.isEmpty()} ? 'Fachada ilustrativa' : ${apartamento.imagens[0].legenda}"
+                             width="1280" height="800">
+                    </div>
+                    <div class="galeria-miniaturas" th:if="${apartamento.imagens.size() > 1}">
+                        <a th:each="img, it : ${apartamento.imagens}" data-galeria
+                           th:href="@{${img.url}}" th:attr="data-legenda=${img.legenda}"
+                           th:classappend="${it.first} ? 'ativa'"
+                           th:title="${img.legenda}">
+                            <img th:src="@{${img.url}}" alt="" width="320" height="200" loading="lazy">
+                        </a>
+                    </div>
+                    <p class="galeria-legenda">
+                        <span id="galeria-legenda" th:text="${apartamento.imagens.isEmpty()} ? '' : ${apartamento.imagens[0].legenda}">Fachada do edifício</span>
+                        · ilustrações fictícias geradas pelo sistema
+                    </p>
+                </div>
+
+                <h1 th:text="${apartamento.titulo}">Título do anúncio</h1>
+                <p class="local" th:text="${apartamento.enderecoCompleto}">Endereço</p>
+
+                <h2>Ficha técnica</h2>
+                <dl class="ficha-tecnica">
+                    <div><dt>Área</dt><dd><span th:text="${apartamento.areaM2}">98</span> m²</dd></div>
+                    <div><dt>Quartos</dt><dd th:text="${apartamento.quartos}">3</dd></div>
+                    <div><dt>Suítes</dt><dd th:text="${apartamento.suites}">1</dd></div>
+                    <div><dt>Banheiros</dt><dd th:text="${apartamento.banheiros}">2</dd></div>
+                    <div><dt>Vagas</dt><dd th:text="${apartamento.vagas}">2</dd></div>
+                    <div><dt>Andar</dt><dd th:text="${apartamento.andar != null} ? ${apartamento.andar} + 'º' : '—'">12º</dd></div>
+                    <div><dt>Condomínio</dt><dd th:text="${apartamento.valorCondominio != null} ? ${@fmt.moeda(apartamento.valorCondominio)} : '—'">R$ 1.100</dd></div>
+                    <div><dt>Preço por m²</dt><dd th:text="${@fmt.moeda(apartamento.precoPorM2)}">R$ 9.082</dd></div>
+                    <div><dt>Anunciado em</dt><dd th:text="${@fmt.data(apartamento.criadoEm)}">01/10/2026</dd></div>
+                </dl>
+
+                <h2>Sobre o apartamento</h2>
+                <p class="descricao" th:text="${apartamento.descricao}">Descrição do anúncio.</p>
+
+                <th:block th:if="${!apartamento.comodidades.isEmpty()}">
+                    <h2>Comodidades</h2>
+                    <ul class="etiquetas">
+                        <li th:each="c : ${apartamento.comodidades}" th:text="${c.nome}">Piscina</li>
+                    </ul>
+                </th:block>
+            </div>
+
+            <!-- ================================================= painel de proposta -->
+            <aside class="proposta-painel" aria-label="Preço e proposta">
+                <p class="preco" th:text="${@fmt.moeda(apartamento.preco)}">R$ 890.000</p>
+                <p class="sub">
+                    <span th:text="${@fmt.moeda(apartamento.precoPorM2)}">R$ 9.082</span> por m²
+                    <th:block th:if="${apartamento.valorCondominio != null}">
+                        · condomínio <span th:text="${@fmt.moeda(apartamento.valorCondominio)}">R$ 1.100</span>
+                    </th:block>
+                </p>
+
+                <!-- ---------- anúncio na vitrine: dá para fazer proposta ---------- -->
+                <th:block th:if="${status == 'PUBLICADO'}">
+
+                    <!-- visitante -->
+                    <th:block th:if="${usuarioLogado == null}">
+                        <p>Entre com uma conta de comprador para enviar sua proposta ao vendedor.</p>
+                        <a class="btn btn-primario btn-bloco" th:href="@{/login}">Entrar para fazer proposta</a>
+                        <p class="discreto" style="margin:0.75rem 0 0">
+                            Ainda não tem conta? <a th:href="@{/cadastro}">Criar conta grátis</a>
+                        </p>
+                    </th:block>
+
+                    <!-- comprador -->
+                    <th:block th:if="${ehComprador}">
+                        <div th:if="${propostaAtual != null}">
+                            <p class="aviso aviso-info" style="margin-top:0">
+                                Você já tem uma proposta de
+                                <strong th:text="${@fmt.moeda(propostaAtual.valorOfertado)}">R$ 850.000</strong>
+                                neste apartamento
+                                (<span th:replace="~{fragments/layout :: selo(${propostaAtual.status})}"></span>).
+                            </p>
+                            <a class="btn btn-secundario btn-bloco" th:href="@{/comprador/propostas}">Ver minhas propostas</a>
+                        </div>
+
+                        <form th:if="${propostaAtual == null}" method="post" novalidate
+                              th:action="@{/comprador/apartamentos/{id}/proposta(id=${apartamento.id})}"
+                              th:object="${propostaForm}">
+                            <div class="campo">
+                                <label for="valor">Seu valor (R$)</label>
+                                <input class="controle num" id="valor" type="number" step="0.01" min="1"
+                                       th:field="*{valor}" th:errorclass="invalido" required>
+                                <span class="erro-campo" th:if="${#fields.hasErrors('valor')}" th:errors="*{valor}">Erro</span>
+                                <p class="ajuda">O preço anunciado já vem preenchido; ajuste se quiser negociar.</p>
+                            </div>
+                            <div class="campo">
+                                <label for="mensagem">Mensagem <span class="opcional">(opcional)</span></label>
+                                <textarea class="controle" id="mensagem" rows="3" maxlength="1000"
+                                          th:field="*{mensagem}" th:errorclass="invalido"
+                                          placeholder="Ex.: tenho interesse em visitar o imóvel."></textarea>
+                                <span class="erro-campo" th:if="${#fields.hasErrors('mensagem')}" th:errors="*{mensagem}">Erro</span>
+                            </div>
+                            <button type="submit" class="btn btn-primario btn-bloco">Enviar proposta</button>
+                        </form>
+
+                        <hr>
+                        <form method="post" th:action="@{/comprador/favoritos/{id}(id=${apartamento.id})}">
+                            <button type="submit" class="btn btn-secundario btn-bloco"
+                                    th:text="${favorito} ? 'Remover dos favoritos' : 'Salvar nos favoritos'">Salvar nos favoritos</button>
+                        </form>
+                    </th:block>
+
+                    <!-- vendedor / administrador -->
+                    <p class="discreto" th:if="${usuarioLogado != null and !ehComprador}">
+                        Propostas são enviadas por contas de comprador.
+                    </p>
+                </th:block>
+
+                <!-- ---------- anúncio fora da vitrine ---------- -->
+                <p class="aviso aviso-info" style="margin-top:0" th:if="${status == 'RESERVADO'}">
+                    <strong>Reservado.</strong> Já existe uma proposta aceita para este apartamento.
+                </p>
+                <p class="aviso aviso-atencao" style="margin-top:0" th:if="${status == 'VENDIDO'}">
+                    <strong>Vendido.</strong> Este apartamento não está mais disponível.
+                </p>
+
+                <!-- ---------- ações do dono e da administração ---------- -->
+                <th:block th:if="${ehDono}">
+                    <hr>
+                    <p class="discreto" style="margin-bottom:0.5rem">Este é um anúncio seu.</p>
+                    <div class="acoes">
+                        <a class="btn btn-secundario btn-sm" th:if="${status != 'RESERVADO' and status != 'VENDIDO'}"
+                           th:href="@{/vendedor/anuncios/{id}/editar(id=${apartamento.id})}">Editar anúncio</a>
+                        <a class="btn btn-secundario btn-sm" th:href="@{/vendedor/anuncios}">Meus anúncios</a>
+                    </div>
+                </th:block>
+                <th:block th:if="${usuarioLogado != null and usuarioLogado.admin}">
+                    <hr>
+                    <a class="btn btn-secundario btn-sm" th:href="@{/admin/anuncios(status=${status})}">Moderar este anúncio</a>
+                </th:block>
+
+                <p class="vendedor">
+                    Anunciado por <strong th:text="${apartamento.vendedor.nome}">Carla Menezes</strong>.
+                    O contato entre as partes acontece pelas propostas, dentro do site.
+                </p>
+            </aside>
+        </div>
+    </article>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

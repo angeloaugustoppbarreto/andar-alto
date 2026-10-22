@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Comodidades')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('comodidades')}"></header>
+
+<main id="conteudo">
+    <div th:replace="~{fragments/layout :: avisos}"></div>
+
+    <div class="container painel">
+        <div class="painel-cabecalho">
+            <div>
+                <h1>Comodidades</h1>
+                <p>Itens que os vendedores podem marcar nos anúncios (piscina, academia, elevador...).</p>
+            </div>
+        </div>
+
+        <form class="formulario-bloco estreito" th:action="@{/admin/comodidades}" method="post">
+            <h2>Nova comodidade</h2>
+            <div class="linha-form">
+                <label class="sr-only" for="nome">Nome da comodidade</label>
+                <input class="controle" id="nome" name="nome" type="text" maxlength="60" required placeholder="Ex.: Churrasqueira">
+                <button type="submit" class="btn btn-primario">Adicionar</button>
+            </div>
+        </form>
+
+        <section class="bloco estreito" th:if="${!comodidades.isEmpty()}">
+            <div class="tabela-rolagem">
+                <table class="tabela">
+                    <caption class="sr-only">Comodidades cadastradas</caption>
+                    <thead><tr><th>Nome</th><th><span class="sr-only">Ações</span></th></tr></thead>
+                    <tbody>
+                    <tr th:each="c : ${comodidades}">
+                        <td th:text="${c.nome}">Piscina</td>
+                        <td class="direita">
+                            <form method="post" th:action="@{/admin/comodidades/{id}/excluir(id=${c.id})}"
+                                  th:attr="data-confirmar='Remover &quot;' + ${c.nome} + '&quot; da lista e de todos os anúncios que a usam?'">
+                                <button type="submit" class="btn btn-perigo btn-sm">Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div class="vazio estreito" th:if="${comodidades.isEmpty()}">
+            <h2>Nenhuma comodidade cadastrada</h2>
+            <p>Adicione a primeira no formulário acima.</p>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

@@ -1,0 +1,8 @@
+target/
+data/
+.git/
+.idea/
+*.iml
+.vscode/
+README.md
+DEPLOY.md

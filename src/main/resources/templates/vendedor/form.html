@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head((${edicao} ? 'Editar anúncio' : 'Novo anúncio'))}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('anuncios')}"></header>
+
+<main id="conteudo">
+    <div th:replace="~{fragments/layout :: avisos}"></div>
+
+    <div class="container painel">
+        <div class="painel-cabecalho">
+            <div>
+                <h1 th:text="${edicao} ? 'Editar anúncio' : 'Novo anúncio'">Novo anúncio</h1>
+                <p th:if="${!edicao}">Depois de enviado, o anúncio fica em análise até a administração aprovar.</p>
+                <p th:if="${edicao}" th:text="${anuncio.titulo}">Título</p>
+            </div>
+            <a class="btn btn-secundario" th:href="@{/vendedor/anuncios}">Voltar</a>
+        </div>
+
+        <div class="aviso aviso-erro" role="alert" th:if="${edicao and anuncio.status.name() == 'REJEITADO'}">
+            Este anúncio foi rejeitado<span th:if="${anuncio.motivoRejeicao != null}">:
+            <strong th:text="${anuncio.motivoRejeicao}">motivo</strong></span>.
+            Ao salvar as correções, ele volta para análise.
+        </div>
+
+        <form class="medio" style="margin-top:1.25rem" method="post" novalidate th:object="${form}"
+              th:action="${edicao} ? @{/vendedor/anuncios/{id}(id=${anuncio.id})} : @{/vendedor/anuncios}">
+
+            <!-- "*" = qualquer erro deste formulário. -->
+            <div class="aviso aviso-erro" role="alert" th:if="${#fields.hasErrors('*')}" style="margin-top:0;margin-bottom:1.25rem">
+                Confira os campos destacados abaixo.
+            </div>
+
+            <!-- ============================================ o anúncio -->
+            <fieldset class="formulario-bloco" style="min-width:0">
+                <legend class="sr-only">O anúncio</legend>
+                <h2>O anúncio</h2>
+                <div class="campo">
+                    <label for="titulo">Título</label>
+                    <input class="controle" id="titulo" type="text" th:field="*{titulo}" th:errorclass="invalido"
+                           maxlength="140" placeholder="Ex.: Três quartos com vista para o mar" required>
+                    <span class="erro-campo" th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}">Erro</span>
+                </div>
+                <div class="campo">
+                    <label for="descricao">Descrição</label>
+                    <textarea class="controle" id="descricao" rows="6" maxlength="4000" th:field="*{descricao}"
+                              th:errorclass="invalido" required></textarea>
+                    <span class="erro-campo" th:if="${#fields.hasErrors('descricao')}" th:errors="*{descricao}">Erro</span>
+                    <p class="ajuda">Conte o que o apartamento tem de melhor. Até 4.000 caracteres.</p>
+                </div>
+            </fieldset>
+
+            <!-- ============================================ valores e medidas -->
+            <fieldset class="formulario-bloco" style="min-width:0">
+                <legend class="sr-only">Valores e características</legend>
+                <h2>Valores e características</h2>
+                <div class="grade-form">
+                    <div class="campo">
+                        <label for="preco">Preço (R$)</label>
+                        <input class="controle num" id="preco" type="number" step="0.01" min="1" th:field="*{preco}"
+                               th:errorclass="invalido" required>
+                        <span class="erro-campo" th:if="${#fields.hasErrors('preco')}" th:errors="*{preco}">Erro</span>
+                    </div>
+                    <div class="campo">
+                        <label for="valorCondominio">Condomínio (R$/mês) <span class="opcional">(opcional)</span></label>
+                        <input class="controle num" id="valorCondominio" type="number" step="0.01" min="0"
+                               th:field="*{valorCondominio}" th:errorclass="invalido">
+                        <span class="erro-campo" th:if="${#fields.hasErrors('valorCondominio')}" th:errors="*{valorCondominio}">Erro</span>
+                    </div>
+                    <div class="campo">
+                        <label for="areaM2">Área (m²)</label>
+                        <input class="controle num" id="areaM2" type="number" min="10" max="2000" th:field="*{areaM2}"
+                               th:errorclass="invalido" required>
+                        <span class="erro-campo" th:if="${#fields.hasErrors('areaM2')}" th:errors="*{areaM2}">Erro</span>
+                    </div>
+                    <div class="campo">
+                        <label for="quartos">Quartos</label>
+                        <input class="controle num" id="quartos" type="number" min="0" max="20" th:field="*{quartos}"
+                               th:errorclass="invalido" required>
+                        <span class="erro-campo" th:if="${#fields.hasErrors('quartos')}" th:errors="*{quartos}">Erro</span>
+                    </div>
+                    <div class="campo">
+                        <label for="suites">Suítes</label>
+                        <input class="controle num" id="suites" type="number" min="0" max="20" th:field="*{suites}"
+                               th:errorclass="invalido" required>
+                        <span class="erro-campo" th:if="${#fields.hasErrors('suites')}" th:errors="*{suites}">Erro</span>
+                    </div>
+                    <div class="campo">
+                        <label for="banheiros">Banheiros</label>
+                        <input class="controle num" id="banheiros" type="number" min="1" max="20" th:field="*{banheiros}"
+                               th:errorclass="invalido" required>
+                        <span class="erro-campo" th:if="${#fields.hasErrors('banheiros')}" th:errors="*{banheiros}">Erro</span>
+                    </div>
+                    <div class="campo">
+                        <label for="vagas">Vagas de garagem</label>
+                        <input class="controle num" id="vagas" type="number" min="0" max="20" th:field="*{vagas}"
+                               th:errorclass="invalido" required>
+                        <span class="erro-campo" th:if="${#fields.hasErrors('vagas')}" th:errors="*{vagas}">Erro</span>
+                    </div>
+                    <div class="campo">
+                        <label for="andar">Andar <span class="opcional">(opcional)</span></label>
+                        <input class="controle num" id="andar" type="number" min="0" max="200" th:field="*{andar}"
+                               th:errorclass="invalido">
+                        <span class="erro-campo" th:if="${#fields.hasErrors('andar')}" th:errors="*{andar}">Erro</span>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- ============================================ endereço -->
+            <fieldset class="formulario-bloco" style="min-width:0">
+                <legend class="sr-only">Endereço</legend>
+                <h2>Endereço</h2>
+                <div class="grade-form">
+                    <div class="campo">
+                        <label for="cep">CEP <span class="opcional">(opcional)</span></label>
+                        <input class="controle" id="cep" type="text" th:field="*{cep}" th:errorclass="invalido"
+                               inputmode="numeric" maxlength="9" placeholder="00000-000">
+                        <span class="erro-campo" th:if="${#fields.hasErrors('cep')}" th:errors="*{cep}">Erro</span>
+                    </div>
+                    <div class="campo largo">
+                        <label for="logradouro">Rua ou avenida</label>
+                        <input class="controle" id="logradouro" type="text" th:field="*{logradouro}"
+                               th:errorclass="invalido" maxlength="160" required>
+                        <span class="erro-campo" th:if="${#fields.hasErrors('logradouro')}" th:errors="*{logradouro}">Erro</span>
+                    </div>
+                    <div class="campo">
+                        <label for="numero">Número <span class="opcional">(opcional)</span></label>
+                        <input class="controle" id="numero" type="text" th:field="*{numero}" th:errorclass="invalido" maxlength="10">
+                        <span class="erro-campo" th:if="${#fields.hasErrors('numero')}" th:errors="*{numero}">Erro</span>
+                    </div>
+                    <div class="campo">
+                        <label for="bairro">Bairro</label>
+                        <input class="controle" id="bairro" type="text" th:field="*{bairro}" th:errorclass="invalido"
+                               maxlength="80" required>
+                        <span class="erro-campo" th:if="${#fields.hasErrors('bairro')}" th:errors="*{bairro}">Erro</span>
+                    </div>
+                    <div class="campo">
+                        <label for="cidade">Cidade</label>
+                        <input class="controle" id="cidade" type="text" th:field="*{cidade}" th:errorclass="invalido"
+                               maxlength="80" required>
+                        <span class="erro-campo" th:if="${#fields.hasErrors('cidade')}" th:errors="*{cidade}">Erro</span>
+                    </div>
+                    <div class="campo">
+                        <label for="uf">UF</label>
+                        <input class="controle" id="uf" type="text" th:field="*{uf}" th:errorclass="invalido"
+                               maxlength="2" placeholder="PE" style="text-transform:uppercase" required>
+                        <span class="erro-campo" th:if="${#fields.hasErrors('uf')}" th:errors="*{uf}">Erro</span>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- ============================================ comodidades -->
+            <fieldset class="formulario-bloco" style="min-width:0" th:if="${!comodidades.isEmpty()}">
+                <legend class="sr-only">Comodidades</legend>
+                <h2>Comodidades</h2>
+                <div class="opcoes">
+                    <label th:each="c : ${comodidades}">
+                        <input type="checkbox" th:field="*{comodidadeIds}" th:value="${c.id}">
+                        <span th:text="${c.nome}">Piscina</span>
+                    </label>
+                </div>
+            </fieldset>
+
+            <p class="aviso aviso-info" style="margin-top:0">
+                As fotos deste anúncio são <strong>ilustrações fictícias</strong> (fachada, sala, quarto e cozinha)
+                geradas automaticamente pelo sistema.
+            </p>
+
+            <div class="acoes" style="margin-top:1.25rem">
+                <button type="submit" class="btn btn-primario"
+                        th:text="${edicao} ? 'Salvar alterações' : 'Enviar para análise'">Enviar para análise</button>
+                <a class="btn btn-secundario" th:href="@{/vendedor/anuncios}">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

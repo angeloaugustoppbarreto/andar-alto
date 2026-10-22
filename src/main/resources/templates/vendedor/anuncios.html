@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Meus anúncios')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('anuncios')}"></header>
+
+<main id="conteudo">
+    <div th:replace="~{fragments/layout :: avisos}"></div>
+
+    <div class="container painel">
+        <div class="painel-cabecalho">
+            <div>
+                <h1>Meus anúncios</h1>
+                <p>Todo anúncio novo passa pela análise da administração antes de aparecer na vitrine.</p>
+            </div>
+            <a class="btn btn-primario" th:href="@{/vendedor/anuncios/novo}">Novo anúncio</a>
+        </div>
+
+        <section class="bloco" th:if="${!anuncios.isEmpty()}">
+            <div class="tabela-rolagem">
+                <table class="tabela">
+                    <caption class="sr-only">Lista dos seus anúncios</caption>
+                    <thead>
+                    <tr>
+                        <th>Apartamento</th>
+                        <th class="num">Preço</th>
+                        <th>Situação</th>
+                        <th>Atualizado</th>
+                        <th><span class="sr-only">Ações</span></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="a : ${anuncios}" th:with="s=${a.status.name()}">
+                        <td>
+                            <div style="display:flex;gap:0.75rem;align-items:flex-start">
+                                <img class="miniatura" th:src="@{${a.capaUrl}}" alt="" width="88" height="66" loading="lazy">
+                                <div>
+                                    <a class="titulo-linha" th:href="@{/apartamentos/{id}(id=${a.id})}" th:text="${a.titulo}">Título</a>
+                                    <div class="discreto" th:text="${a.localizacao}">Boa Viagem, Recife - PE</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="num sem-quebra" th:text="${@fmt.moeda(a.preco)}">R$ 890.000</td>
+                        <td>
+                            <span th:replace="~{fragments/layout :: selo(${a.status})}"></span>
+                            <span class="selo selo-reservado" th:if="${a.destaque}" style="margin-left:0.25rem">Destaque</span>
+                            <p class="motivo" th:if="${s == 'REJEITADO' and a.motivoRejeicao != null}">
+                                Motivo: <span th:text="${a.motivoRejeicao}">motivo</span>
+                            </p>
+                            <p class="nota" th:if="${s == 'REJEITADO'}">Corrija e salve: o anúncio volta para análise.</p>
+                            <p class="nota" th:if="${s == 'EM_ANALISE'}">Aguardando aprovação da administração.</p>
+                        </td>
+                        <td class="sem-quebra" th:text="${@fmt.data(a.atualizadoEm)}">01/10/2026</td>
+                        <td>
+                            <div class="acoes">
+                                <a class="btn btn-secundario btn-sm" th:if="${s != 'RESERVADO' and s != 'VENDIDO'}"
+                                   th:href="@{/vendedor/anuncios/{id}/editar(id=${a.id})}">Editar</a>
+
+                                <form method="post" th:if="${s == 'PUBLICADO'}"
+                                      th:action="@{/vendedor/anuncios/{id}/pausar(id=${a.id})}">
+                                    <button type="submit" class="btn btn-secundario btn-sm">Pausar</button>
+                                </form>
+                                <form method="post" th:if="${s == 'PAUSADO'}"
+                                      th:action="@{/vendedor/anuncios/{id}/reativar(id=${a.id})}">
+                                    <button type="submit" class="btn btn-secundario btn-sm">Reativar</button>
+                                </form>
+
+                                <form method="post" th:if="${s == 'RESERVADO'}"
+                                      th:action="@{/vendedor/anuncios/{id}/concluir-venda(id=${a.id})}"
+                                      data-confirmar="Concluir a venda? O anúncio será marcado como vendido e isso não tem volta.">
+                                    <button type="submit" class="btn btn-primario btn-sm">Concluir venda</button>
+                                </form>
+                                <form method="post" th:if="${s == 'RESERVADO'}"
+                                      th:action="@{/vendedor/anuncios/{id}/cancelar-reserva(id=${a.id})}"
+                                      data-confirmar="Cancelar a reserva? O anúncio volta para a vitrine.">
+                                    <button type="submit" class="btn btn-perigo btn-sm">Cancelar reserva</button>
+                                </form>
+
+                                <form method="post" th:if="${s != 'RESERVADO' and s != 'VENDIDO'}"
+                                      th:action="@{/vendedor/anuncios/{id}/excluir(id=${a.id})}"
+                                      data-confirmar="Excluir este anúncio de vez? Isso não pode ser desfeito.">
+                                    <button type="submit" class="btn btn-perigo btn-sm">Excluir</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div class="vazio" th:if="${anuncios.isEmpty()}">
+            <h2>Você ainda não anunciou nenhum apartamento</h2>
+            <p>Preencha o formulário e envie para análise. As ilustrações do anúncio são geradas automaticamente.</p>
+            <a class="btn btn-primario" th:href="@{/vendedor/anuncios/novo}">Criar primeiro anúncio</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

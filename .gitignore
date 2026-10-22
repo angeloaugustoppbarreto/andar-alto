@@ -1,0 +1,17 @@
+# Compilação
+target/
+
+# Banco de dados local (H2 em arquivo) - gerado ao rodar a aplicação
+data/
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Sistema
+.DS_Store
+Thumbs.db

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Minhas propostas')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('propostas')}"></header>
+
+<main id="conteudo">
+    <div th:replace="~{fragments/layout :: avisos}"></div>
+
+    <div class="container painel">
+        <div class="painel-cabecalho">
+            <div>
+                <h1>Minhas propostas</h1>
+                <p>Cada proposta é uma oferta que o vendedor pode aceitar ou recusar.</p>
+            </div>
+            <a class="btn btn-secundario" th:href="@{/apartamentos}">Buscar apartamentos</a>
+        </div>
+
+        <section class="bloco" th:if="${!propostas.isEmpty()}">
+            <div class="tabela-rolagem">
+                <table class="tabela">
+                    <caption class="sr-only">Lista das suas propostas</caption>
+                    <thead>
+                    <tr>
+                        <th>Apartamento</th>
+                        <th class="num">Preço anunciado</th>
+                        <th class="num">Sua oferta</th>
+                        <th>Situação</th>
+                        <th>Enviada em</th>
+                        <th><span class="sr-only">Ações</span></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="p : ${propostas}">
+                        <td>
+                            <div style="display:flex;gap:0.75rem;align-items:flex-start">
+                                <img class="miniatura" th:src="@{${p.apartamento.capaUrl}}" alt="" width="88" height="66" loading="lazy">
+                                <div>
+                                    <a class="titulo-linha" th:href="@{/apartamentos/{id}(id=${p.apartamento.id})}"
+                                       th:text="${p.apartamento.titulo}">Título</a>
+                                    <div class="discreto" th:text="${p.apartamento.localizacao}">Boa Viagem, Recife - PE</div>
+                                    <div style="margin-top:0.35rem" th:if="${p.apartamento.status.name() == 'VENDIDO' and p.aceita}">
+                                        <span class="selo selo-vendido">Negócio concluído</span>
+                                    </div>
+                                    <div style="margin-top:0.35rem" th:if="${p.apartamento.status.name() == 'RESERVADO' and p.aceita}">
+                                        <span class="selo selo-reservado">Apartamento reservado para você</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="num sem-quebra" th:text="${@fmt.moeda(p.apartamento.preco)}">R$ 890.000</td>
+                        <td class="num sem-quebra"><strong th:text="${@fmt.moeda(p.valorOfertado)}">R$ 850.000</strong></td>
+                        <td>
+                            <span th:replace="~{fragments/layout :: selo(${p.status})}"></span>
+                            <p class="nota" th:if="${p.resposta != null}" th:text="${p.resposta}">Resposta do vendedor</p>
+                        </td>
+                        <td class="sem-quebra" th:text="${@fmt.data(p.criadoEm)}">01/10/2026</td>
+                        <td>
+                            <!-- Dá para desistir de uma proposta pendente ou de uma reserva ainda não concluída. -->
+                            <form method="post" class="acoes"
+                                  th:if="${p.pendente or (p.aceita and p.apartamento.status.name() == 'RESERVADO')}"
+                                  th:action="@{/comprador/propostas/{id}/cancelar(id=${p.id})}"
+                                  th:attr="data-confirmar=${p.pendente} ? 'Cancelar esta proposta?' : 'Desistir da reserva? O apartamento volta para a vitrine.'">
+                                <button type="submit" class="btn btn-perigo btn-sm"
+                                        th:text="${p.pendente} ? 'Cancelar proposta' : 'Desistir da reserva'">Cancelar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div class="vazio" th:if="${propostas.isEmpty()}">
+            <h2>Você ainda não fez propostas</h2>
+            <p>Encontre um apartamento de que goste e envie uma oferta direto pela página do anúncio.</p>
+            <a class="btn btn-primario" th:href="@{/apartamentos}">Buscar apartamentos</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

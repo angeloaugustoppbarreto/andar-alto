@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- ============================================================ AÇÕES DE MODERAÇÃO -->
+<!-- Botões do administrador sobre um anúncio: ver, aprovar, destacar e rejeitar (com motivo). -->
+<div th:fragment="acoes(a)" th:with="s=${a.status.name()}">
+    <div class="acoes">
+        <a class="btn btn-secundario btn-sm" th:href="@{/apartamentos/{id}(id=${a.id})}">Ver</a>
+
+        <form method="post" th:if="${s == 'EM_ANALISE'}" th:action="@{/admin/anuncios/{id}/aprovar(id=${a.id})}">
+            <button type="submit" class="btn btn-primario btn-sm">Aprovar</button>
+        </form>
+
+        <form method="post" th:if="${s == 'PUBLICADO'}" th:action="@{/admin/anuncios/{id}/destaque(id=${a.id})}">
+            <button type="submit" class="btn btn-secundario btn-sm"
+                    th:text="${a.destaque} ? 'Tirar destaque' : 'Destacar'">Destacar</button>
+        </form>
+    </div>
+
+    <!-- O vendedor lê o motivo no painel dele para poder corrigir o anúncio. -->
+    <details class="recusa" th:if="${s == 'EM_ANALISE' or s == 'PUBLICADO'}">
+        <summary>Rejeitar</summary>
+        <form method="post" th:action="@{/admin/anuncios/{id}/rejeitar(id=${a.id})}">
+            <label class="sr-only" th:for="${'motivo-' + a.id}">Motivo da rejeição</label>
+            <input class="controle" type="text" name="motivo" maxlength="500" required
+                   placeholder="Motivo (o vendedor vai ler)" th:id="${'motivo-' + a.id}">
+            <button type="submit" class="btn btn-perigo btn-sm">Confirmar rejeição</button>
+        </form>
+    </details>
+</div>
+
+</body>
+</html>

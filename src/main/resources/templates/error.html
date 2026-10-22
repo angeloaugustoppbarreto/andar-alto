@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<!--
+  O Spring Boot usa este arquivo (nome "error") para qualquer erro HTTP:
+  404 (não encontrado), 403 (sem permissão), 500 (falha do servidor)...
+  "status" é o código numérico do erro, preenchido pelo próprio Spring.
+-->
+<head th:replace="~{fragments/layout :: head('Ops')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('erro')}"></header>
+
+<main id="conteudo" class="container">
+    <div class="pagina-erro">
+        <p class="codigo num" th:text="${status != null} ? ${status} : 'Erro'">404</p>
+
+        <th:block th:switch="${status}">
+            <th:block th:case="404">
+                <h1>Página não encontrada</h1>
+                <p class="suave">O endereço não existe, ou o anúncio saiu do ar. Que tal procurar outro apartamento?</p>
+            </th:block>
+            <th:block th:case="403">
+                <h1>Acesso negado</h1>
+                <p class="suave">Sua conta não tem permissão para abrir esta página.</p>
+            </th:block>
+            <th:block th:case="*">
+                <h1>Algo deu errado</h1>
+                <p class="suave">Não foi possível concluir o pedido. Tente de novo em instantes.</p>
+            </th:block>
+        </th:block>
+
+        <div class="acoes">
+            <a class="btn btn-primario" th:href="@{/}">Voltar ao início</a>
+            <a class="btn btn-secundario" th:href="@{/apartamentos}">Buscar apartamentos</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

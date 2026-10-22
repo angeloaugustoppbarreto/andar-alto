@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Apartamentos à venda')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('inicio')}"></header>
+
+<main id="conteudo">
+    <div class="container">
+        <p class="aviso aviso-info" role="status" th:if="${param.saiu != null}">Você saiu da sua conta. Até logo!</p>
+    </div>
+    <div th:replace="~{fragments/layout :: avisos}"></div>
+
+    <!-- ================================================= abertura: busca + fachada -->
+    <section class="abertura" aria-labelledby="titulo-abertura">
+        <div class="container abertura-grade">
+            <div>
+                <h1 id="titulo-abertura">Seu próximo andar começa aqui.</h1>
+                <p class="lide">Compre e venda apartamentos com propostas direto no site. Cada anúncio passa
+                    por uma análise antes de ir ao ar.</p>
+
+                <form class="busca-rapida" th:action="@{/apartamentos}" method="get" role="search">
+                    <label>
+                        <span>Cidade</span>
+                        <select name="cidade">
+                            <option value="">Todas</option>
+                            <option th:each="c : ${cidades}" th:value="${c}" th:text="${c}">Recife</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span>Quartos</span>
+                        <select name="quartos">
+                            <option value="">Qualquer</option>
+                            <option value="1">1 ou mais</option>
+                            <option value="2">2 ou mais</option>
+                            <option value="3">3 ou mais</option>
+                            <option value="4">4 ou mais</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span>Preço até</span>
+                        <select name="precoMax">
+                            <option value="">Qualquer</option>
+                            <option value="300000">R$ 300 mil</option>
+                            <option value="500000">R$ 500 mil</option>
+                            <option value="800000">R$ 800 mil</option>
+                            <option value="1200000">R$ 1,2 milhão</option>
+                            <option value="2000000">R$ 2 milhões</option>
+                        </select>
+                    </label>
+                    <button type="submit" class="btn btn-destaque">Buscar</button>
+                </form>
+
+                <p class="total num">
+                    <strong th:text="${totalPublicados}">14</strong>
+                    <span th:text="${totalPublicados == 1} ? 'apartamento disponível agora' : 'apartamentos disponíveis agora'">apartamentos disponíveis agora</span>
+                </p>
+            </div>
+
+            <!-- Fachada decorativa: um prédio visto de frente, com algumas janelas acesas. -->
+            <div class="fachada" aria-hidden="true">
+                <div class="fachada-predio">
+                    <div class="fachada-andar"><b>6</b><div class="janelas"><i></i><i class="acesa" style="--n:3"></i><i></i><i></i><i class="acesa" style="--n:0"></i></div></div>
+                    <div class="fachada-andar"><b>5</b><div class="janelas"><i class="acesa" style="--n:5"></i><i></i><i></i><i></i><i></i></div></div>
+                    <div class="fachada-andar"><b>4</b><div class="janelas"><i></i><i></i><i class="acesa" style="--n:1"></i><i class="acesa" style="--n:6"></i><i></i></div></div>
+                    <div class="fachada-andar"><b>3</b><div class="janelas"><i></i><i class="acesa" style="--n:4"></i><i></i><i></i><i></i></div></div>
+                    <div class="fachada-andar"><b>2</b><div class="janelas"><i class="acesa" style="--n:2"></i><i></i><i></i><i class="acesa" style="--n:7"></i><i></i></div></div>
+                    <div class="fachada-andar"><b>1</b><div class="janelas"><i></i><i></i><i></i><i></i><i class="acesa" style="--n:8"></i></div></div>
+                    <div class="fachada-andar fachada-terreo"><b>T</b><div class="janelas"><i></i><i></i><i class="porta"></i><i></i><i></i></div></div>
+                </div>
+                <div class="fachada-chao"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================= destaques -->
+    <section class="secao" aria-labelledby="titulo-destaques">
+        <div class="container">
+            <div class="secao-cabecalho">
+                <h2 id="titulo-destaques">Em destaque</h2>
+                <a th:href="@{/apartamentos}">Ver todos os apartamentos &rarr;</a>
+            </div>
+
+            <div class="grade-imoveis" th:if="${!destaques.isEmpty()}">
+                <th:block th:each="a : ${destaques}">
+                    <article th:replace="~{fragments/layout :: cartao(${a})}"></article>
+                </th:block>
+            </div>
+
+            <div class="vazio" th:if="${destaques.isEmpty()}">
+                <h2>Ainda não há apartamentos publicados</h2>
+                <p>Assim que um vendedor anunciar e a administração aprovar, os imóveis aparecem aqui.</p>
+                <a class="btn btn-primario" th:href="@{/cadastro(perfil=VENDEDOR)}" th:if="${usuarioLogado == null}">Quero anunciar</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================= como funciona -->
+    <section class="secao secao-papel" aria-labelledby="titulo-passos">
+        <div class="container">
+            <div class="secao-cabecalho"><h2 id="titulo-passos">Como funciona</h2></div>
+            <ol class="passos">
+                <li>
+                    <h3>Encontre</h3>
+                    <p>Filtre por cidade, preço, quartos e vagas. Salve os favoritos para comparar depois.</p>
+                </li>
+                <li>
+                    <h3>Faça uma proposta</h3>
+                    <p>Em vez de “comprar com um clique”, você oferece um valor. O vendedor aceita ou recusa.</p>
+                </li>
+                <li>
+                    <h3>Feche o negócio</h3>
+                    <p>Com a proposta aceita, o apartamento fica reservado até o vendedor concluir a venda.</p>
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- ================================================= chamada para vendedores -->
+    <section class="secao" th:if="${usuarioLogado == null or usuarioLogado.vendedor}">
+        <div class="container">
+            <div class="chamada-vendedor">
+                <div>
+                    <h2>Tem um apartamento para vender?</h2>
+                    <p>Cadastre o anúncio, acompanhe as propostas e conclua a venda sem sair do site.</p>
+                </div>
+                <a class="btn btn-destaque" th:if="${usuarioLogado == null}" th:href="@{/cadastro(perfil=VENDEDOR)}">Criar conta de vendedor</a>
+                <a class="btn btn-destaque" th:if="${usuarioLogado != null}" th:href="@{/vendedor/anuncios/novo}">Anunciar agora</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

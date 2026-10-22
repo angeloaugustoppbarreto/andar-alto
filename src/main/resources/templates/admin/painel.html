@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Painel da administração')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('painel')}"></header>
+
+<main id="conteudo">
+    <div th:replace="~{fragments/layout :: avisos}"></div>
+
+    <div class="container painel">
+        <div class="painel-cabecalho">
+            <div>
+                <h1>Painel da administração</h1>
+                <p>Moderação dos anúncios e visão geral da plataforma.</p>
+            </div>
+        </div>
+
+        <div class="numeros">
+            <div class="numero" th:classappend="${!painel.aguardandoAnalise.isEmpty()} ? 'alerta'">
+                <b th:text="${painel.aguardandoAnalise.size()}">0</b><span>anúncios aguardando análise</span>
+            </div>
+            <div class="numero"><b th:text="${painel.totalAnuncios}">0</b><span>anúncios no total</span></div>
+            <div class="numero"><b th:text="${painel.propostasPendentes}">0</b><span>propostas pendentes</span></div>
+            <div class="numero">
+                <b th:text="${painel.totalUsuarios}">0</b>
+                <span><span th:text="${painel.compradores}">0</span> compradores · <span th:text="${painel.vendedores}">0</span> vendedores</span>
+            </div>
+        </div>
+
+        <div class="numeros">
+            <div class="numero"><b th:text="${painel.totalVendas}">0</b><span>vendas concluídas</span></div>
+            <div class="numero"><b class="sem-quebra" th:text="${@fmt.moeda(painel.volumeVendas)}">R$ 0</b><span>volume vendido</span></div>
+            <div class="numero"><b class="sem-quebra" th:text="${@fmt.moedaComCentavos(painel.comissaoTotal)}">R$ 0,00</b><span>comissão da plataforma</span></div>
+        </div>
+
+        <section class="bloco" aria-labelledby="fila">
+            <div class="bloco-cabecalho">
+                <h2 id="fila">Aguardando análise</h2>
+                <a th:href="@{/admin/anuncios}">Todos os anúncios</a>
+            </div>
+
+            <div class="tabela-rolagem" th:if="${!painel.aguardandoAnalise.isEmpty()}">
+                <table class="tabela">
+                    <thead>
+                    <tr><th>Apartamento</th><th>Vendedor</th><th class="num">Preço</th><th>Enviado em</th><th><span class="sr-only">Ações</span></th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="a : ${painel.aguardandoAnalise}">
+                        <td>
+                            <div style="display:flex;gap:0.75rem;align-items:flex-start">
+                                <img class="miniatura" th:src="@{${a.capaUrl}}" alt="" width="88" height="66" loading="lazy">
+                                <div>
+                                    <a class="titulo-linha" th:href="@{/apartamentos/{id}(id=${a.id})}" th:text="${a.titulo}">Título</a>
+                                    <div class="discreto" th:text="${a.localizacao}">Boa Viagem, Recife - PE</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td th:text="${a.vendedor.nome}">Carla Menezes</td>
+                        <td class="num sem-quebra" th:text="${@fmt.moeda(a.preco)}">R$ 890.000</td>
+                        <td class="sem-quebra" th:text="${@fmt.data(a.criadoEm)}">01/10/2026</td>
+                        <td><div th:replace="~{fragments/moderacao :: acoes(${a})}"></div></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="bloco-corpo" th:if="${painel.aguardandoAnalise.isEmpty()}">
+                <p class="suave" style="margin:0">Nenhum anúncio na fila. Tudo em dia.</p>
+            </div>
+        </section>
+
+        <div class="acoes">
+            <a class="btn btn-secundario" th:href="@{/admin/anuncios}">Anúncios</a>
+            <a class="btn btn-secundario" th:href="@{/admin/usuarios}">Usuários</a>
+            <a class="btn btn-secundario" th:href="@{/admin/vendas}">Vendas</a>
+            <a class="btn btn-secundario" th:href="@{/admin/comodidades}">Comodidades</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- ============================================================ OFERTA x PREÇO -->
+<!-- Mostra o valor da oferta e o quanto ela difere do preço anunciado. -->
+<div th:fragment="oferta(p)" th:with="d=${p.diferencaPercentual}">
+    <strong class="sem-quebra" th:text="${@fmt.moeda(p.valorOfertado)}">R$ 850.000</strong>
+    <div class="discreto">
+        <th:block th:if="${d.signum() == 0}">igual ao preço anunciado</th:block>
+        <th:block th:if="${d.signum() < 0}"><span th:text="${@fmt.percentual(d.abs())}">4,5%</span> abaixo do preço</th:block>
+        <th:block th:if="${d.signum() > 0}"><span th:text="${@fmt.percentual(d)}">2,0%</span> acima do preço</th:block>
+    </div>
+</div>
+
+<!-- ============================================================ AÇÕES DO VENDEDOR -->
+<!-- Aceitar e recusar uma proposta pendente. Usado no painel e na lista de propostas. -->
+<div th:fragment="acoes(p)">
+    <form method="post" class="acoes"
+          th:action="@{/vendedor/propostas/{id}/aceitar(id=${p.id})}"
+          data-confirmar="Aceitar esta proposta? O apartamento ficará reservado e as outras propostas pendentes serão recusadas.">
+        <button type="submit" class="btn btn-primario btn-sm">Aceitar</button>
+    </form>
+    <details class="recusa">
+        <summary>Recusar</summary>
+        <form method="post" th:action="@{/vendedor/propostas/{id}/recusar(id=${p.id})}">
+            <label class="sr-only" th:for="${'resposta-' + p.id}">Motivo da recusa (opcional)</label>
+            <input class="controle" type="text" name="resposta" maxlength="500" placeholder="Motivo (opcional)"
+                   th:id="${'resposta-' + p.id}">
+            <button type="submit" class="btn btn-perigo btn-sm">Confirmar recusa</button>
+        </form>
+    </details>
+</div>
+
+</body>
+</html>

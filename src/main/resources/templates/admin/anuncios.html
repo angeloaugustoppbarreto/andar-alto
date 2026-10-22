@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Anúncios (administração)')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('anuncios')}"></header>
+
+<main id="conteudo">
+    <div th:replace="~{fragments/layout :: avisos}"></div>
+
+    <div class="container painel">
+        <div class="painel-cabecalho">
+            <div>
+                <h1>Anúncios</h1>
+                <p>Aprove, rejeite ou destaque os anúncios da plataforma.</p>
+            </div>
+        </div>
+
+        <!-- Filtro por situação: cada link recarrega a página com ?status=... -->
+        <nav class="filtro-status" aria-label="Filtrar por situação">
+            <a th:href="@{/admin/anuncios}" th:classappend="${statusAtual == null} ? 'atual'"
+               th:aria-current="${statusAtual == null} ? 'page'">Todos</a>
+            <a th:each="s : ${situacoes}" th:href="@{/admin/anuncios(status=${s})}" th:text="${s.rotulo}"
+               th:classappend="${statusAtual != null and statusAtual == s} ? 'atual'"
+               th:aria-current="${statusAtual != null and statusAtual == s} ? 'page'">Em análise</a>
+        </nav>
+
+        <section class="bloco" th:if="${!anuncios.isEmpty()}">
+            <div class="tabela-rolagem">
+                <table class="tabela">
+                    <caption class="sr-only">Anúncios da plataforma</caption>
+                    <thead>
+                    <tr>
+                        <th>Apartamento</th>
+                        <th>Vendedor</th>
+                        <th class="num">Preço</th>
+                        <th>Situação</th>
+                        <th>Atualizado</th>
+                        <th><span class="sr-only">Ações</span></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="a : ${anuncios}">
+                        <td>
+                            <div style="display:flex;gap:0.75rem;align-items:flex-start">
+                                <img class="miniatura" th:src="@{${a.capaUrl}}" alt="" width="88" height="66" loading="lazy">
+                                <div>
+                                    <a class="titulo-linha" th:href="@{/apartamentos/{id}(id=${a.id})}" th:text="${a.titulo}">Título</a>
+                                    <div class="discreto" th:text="${a.localizacao}">Boa Viagem, Recife - PE</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td th:text="${a.vendedor.nome}">Carla Menezes</td>
+                        <td class="num sem-quebra" th:text="${@fmt.moeda(a.preco)}">R$ 890.000</td>
+                        <td>
+                            <span th:replace="~{fragments/layout :: selo(${a.status})}"></span>
+                            <span class="selo selo-reservado" th:if="${a.destaque}" style="margin-left:0.25rem">Destaque</span>
+                            <p class="motivo" th:if="${a.motivoRejeicao != null and a.status.name() == 'REJEITADO'}">
+                                Motivo: <span th:text="${a.motivoRejeicao}">motivo</span>
+                            </p>
+                        </td>
+                        <td class="sem-quebra" th:text="${@fmt.data(a.atualizadoEm)}">01/10/2026</td>
+                        <td><div th:replace="~{fragments/moderacao :: acoes(${a})}"></div></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div class="vazio" th:if="${anuncios.isEmpty()}">
+            <h2>Nenhum anúncio nesta situação</h2>
+            <p>Escolha outra situação no filtro acima.</p>
+            <a class="btn btn-primario" th:href="@{/admin/anuncios}">Ver todos</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Usuários')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('usuarios')}"></header>
+
+<main id="conteudo">
+    <div th:replace="~{fragments/layout :: avisos}"></div>
+
+    <div class="container painel">
+        <div class="painel-cabecalho">
+            <div>
+                <h1>Usuários</h1>
+                <p>Uma conta desativada não consegue entrar no site. Você não pode desativar a própria conta.</p>
+            </div>
+        </div>
+
+        <section class="bloco">
+            <div class="tabela-rolagem">
+                <table class="tabela">
+                    <caption class="sr-only">Usuários cadastrados</caption>
+                    <thead>
+                    <tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Situação</th><th>Cadastro</th><th><span class="sr-only">Ações</span></th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="u : ${usuarios}">
+                        <td><strong th:text="${u.nome}">Ana Souza</strong></td>
+                        <td th:text="${u.email}">ana@exemplo.com</td>
+                        <td th:text="${u.perfil.rotulo}">Comprador</td>
+                        <td>
+                            <span class="selo" th:classappend="${u.ativo} ? 'selo-publicado' : 'selo-pausado'"
+                                  th:text="${u.ativo} ? 'Ativa' : 'Desativada'">Ativa</span>
+                        </td>
+                        <td class="sem-quebra" th:text="${@fmt.data(u.criadoEm)}">01/10/2026</td>
+                        <td>
+                            <form method="post" th:if="${u.id != usuarioLogado.id}"
+                                  th:action="@{/admin/usuarios/{id}/alternar(id=${u.id})}"
+                                  th:attr="data-confirmar=${u.ativo} ? 'Desativar a conta de ' + ${u.nome} + '? A pessoa não conseguirá mais entrar.' : 'Reativar a conta de ' + ${u.nome} + '?'">
+                                <button type="submit" class="btn btn-sm"
+                                        th:classappend="${u.ativo} ? 'btn-perigo' : 'btn-secundario'"
+                                        th:text="${u.ativo} ? 'Desativar' : 'Reativar'">Desativar</button>
+                            </form>
+                            <span class="discreto" th:if="${u.id == usuarioLogado.id}">Você</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Criar conta')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topo('cadastro')}"></header>
+
+<main id="conteudo" class="container cartao-acesso">
+    <div class="formulario-bloco">
+        <h1>Criar conta</h1>
+        <p class="suave">Leva um minuto. Você escolhe se vai comprar ou vender.</p>
+
+        <form th:action="@{/cadastro}" th:object="${form}" method="post" novalidate style="margin-top:1.25rem">
+
+            <!-- Erros que não pertencem a um campo só (ex.: "e-mail já cadastrado"). -->
+            <p class="aviso aviso-erro" role="alert" th:if="${#fields.hasGlobalErrors()}"
+               th:each="e : ${#fields.globalErrors()}" th:text="${e}">Erro</p>
+
+            <fieldset class="campo" style="border:0;padding:0;margin:0 0 1rem">
+                <legend class="rotulo" style="padding:0">Quero usar o site para</legend>
+                <div class="escolha-perfil">
+                    <label>
+                        <input type="radio" th:field="*{perfil}" value="COMPRADOR">
+                        <strong>Comprar</strong>
+                        <span>Salvar favoritos e enviar propostas</span>
+                    </label>
+                    <label>
+                        <input type="radio" th:field="*{perfil}" value="VENDEDOR">
+                        <strong>Vender</strong>
+                        <span>Anunciar e negociar propostas</span>
+                    </label>
+                </div>
+                <span class="erro-campo" th:if="${#fields.hasErrors('perfil')}" th:errors="*{perfil}">Erro</span>
+            </fieldset>
+
+            <div class="campo">
+                <label for="nome">Nome completo</label>
+                <input class="controle" id="nome" type="text" th:field="*{nome}" th:errorclass="invalido"
+                       autocomplete="name" maxlength="120" required>
+                <span class="erro-campo" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}">Erro</span>
+            </div>
+
+            <div class="campo">
+                <label for="email">E-mail</label>
+                <input class="controle" id="email" type="email" th:field="*{email}" th:errorclass="invalido"
+                       autocomplete="email" maxlength="160" required>
+                <span class="erro-campo" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Erro</span>
+            </div>
+
+            <div class="campo">
+                <label for="telefone">Telefone <span class="opcional">(opcional)</span></label>
+                <input class="controle" id="telefone" type="tel" th:field="*{telefone}" th:errorclass="invalido"
+                       autocomplete="tel" placeholder="(81) 99999-0000">
+                <span class="erro-campo" th:if="${#fields.hasErrors('telefone')}" th:errors="*{telefone}">Erro</span>
+            </div>
+
+            <div class="campo">
+                <label for="senha">Senha</label>
+                <input class="controle" id="senha" type="password" th:field="*{senha}" th:errorclass="invalido"
+                       autocomplete="new-password" minlength="6" maxlength="60" required>
+                <span class="erro-campo" th:if="${#fields.hasErrors('senha')}" th:errors="*{senha}">Erro</span>
+                <p class="ajuda">De 6 a 60 caracteres.</p>
+            </div>
+
+            <div class="campo">
+                <label for="confirmacaoSenha">Repita a senha</label>
+                <input class="controle" id="confirmacaoSenha" type="password" th:field="*{confirmacaoSenha}"
+                       th:errorclass="invalido" autocomplete="new-password" required>
+                <span class="erro-campo" th:if="${#fields.hasErrors('confirmacaoSenha')}" th:errors="*{confirmacaoSenha}">Erro</span>
+            </div>
+
+            <button type="submit" class="btn btn-primario btn-bloco">Criar conta</button>
+        </form>
+
+        <p class="rodape-form">Já tem conta? <a th:href="@{/login}">Entrar</a></p>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

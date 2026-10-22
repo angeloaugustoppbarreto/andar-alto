@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<!--
+  Fragmentos reutilizáveis (pedaços de página). Cada página do site monta o seu
+  HTML chamando estes pedaços com th:replace, por exemplo:
+      <head th:replace="~{fragments/layout :: head('Buscar apartamentos')}"></head>
+  Assim o topo, o rodapé e os avisos existem em UM só lugar.
+-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head th:fragment="head(titulo)">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${titulo} + ' · Andar Alto'">Andar Alto</title>
+    <meta name="description" content="Andar Alto: apartamentos à venda. Projeto de estudo com imagens fictícias.">
+    <link rel="icon" type="image/svg+xml"
+          href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='2' width='22' height='28' fill='%231d4ed8'/%3E%3Crect x='9' y='7' width='4' height='4' fill='%23f2b705'/%3E%3Crect x='14' y='7' width='4' height='4' fill='%230e2a82'/%3E%3Crect x='19' y='7' width='4' height='4' fill='%230e2a82'/%3E%3Crect x='9' y='13' width='4' height='4' fill='%230e2a82'/%3E%3Crect x='14' y='13' width='4' height='4' fill='%230e2a82'/%3E%3Crect x='19' y='13' width='4' height='4' fill='%230e2a82'/%3E%3Crect x='13' y='23' width='6' height='7' fill='%2314202e'/%3E%3C/svg%3E">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/js/app.js}" defer></script>
+</head>
+
+<body>
+
+<!-- ============================================================ TOPO -->
+<!-- "ativo" diz qual item do menu fica sublinhado: comprar, favoritos, propostas, painel... -->
+<header class="topo" th:fragment="topo(ativo)">
+    <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
+    <div class="container topo-linha">
+        <a class="logo" th:href="@{/}" aria-label="Andar Alto, página inicial">
+            <svg class="marca" viewBox="0 0 32 32" aria-hidden="true">
+                <rect x="5" y="2" width="22" height="28" fill="#1d4ed8"/>
+                <rect x="9" y="7" width="4" height="4" fill="#f2b705"/>
+                <rect x="14" y="7" width="4" height="4" fill="#0e2a82"/>
+                <rect x="19" y="7" width="4" height="4" fill="#0e2a82"/>
+                <rect x="9" y="13" width="4" height="4" fill="#0e2a82"/>
+                <rect x="14" y="13" width="4" height="4" fill="#0e2a82"/>
+                <rect x="19" y="13" width="4" height="4" fill="#f2b705"/>
+                <rect x="9" y="18" width="4" height="4" fill="#0e2a82"/>
+                <rect x="14" y="18" width="4" height="4" fill="#0e2a82"/>
+                <rect x="19" y="18" width="4" height="4" fill="#0e2a82"/>
+                <rect x="13" y="23" width="6" height="7" fill="#14202e"/>
+            </svg>
+            <span class="logo-nome">Andar Alto</span>
+        </a>
+
+        <button type="button" class="menu-botao" aria-expanded="false" aria-controls="menu-principal">Menu</button>
+
+        <nav class="menu" id="menu-principal" aria-label="Principal">
+            <!-- Todo mundo -->
+            <a th:href="@{/apartamentos}" th:aria-current="${ativo == 'comprar'} ? 'page'">Comprar</a>
+
+            <!-- Visitante -->
+            <th:block th:if="${usuarioLogado == null}">
+                <a th:href="@{/cadastro(perfil=VENDEDOR)}">Quero vender</a>
+                <span class="sep" aria-hidden="true"></span>
+                <a th:href="@{/login}" th:aria-current="${ativo == 'login'} ? 'page'">Entrar</a>
+                <a class="btn btn-primario btn-sm" th:href="@{/cadastro}">Criar conta</a>
+            </th:block>
+
+            <!-- Comprador -->
+            <th:block th:if="${usuarioLogado != null and usuarioLogado.comprador}">
+                <a th:href="@{/comprador/favoritos}" th:aria-current="${ativo == 'favoritos'} ? 'page'">Favoritos</a>
+                <a th:href="@{/comprador/propostas}" th:aria-current="${ativo == 'propostas'} ? 'page'">Minhas propostas</a>
+                <a th:href="@{/comprador}" th:aria-current="${ativo == 'painel'} ? 'page'">Painel</a>
+            </th:block>
+
+            <!-- Vendedor -->
+            <th:block th:if="${usuarioLogado != null and usuarioLogado.vendedor}">
+                <a th:href="@{/vendedor}" th:aria-current="${ativo == 'painel'} ? 'page'">Painel</a>
+                <a th:href="@{/vendedor/anuncios}" th:aria-current="${ativo == 'anuncios'} ? 'page'">Meus anúncios</a>
+                <a th:href="@{/vendedor/propostas}" th:aria-current="${ativo == 'propostas'} ? 'page'">Propostas</a>
+                <a th:href="@{/vendedor/vendas}" th:aria-current="${ativo == 'vendas'} ? 'page'">Vendas</a>
+            </th:block>
+
+            <!-- Administrador -->
+            <th:block th:if="${usuarioLogado != null and usuarioLogado.admin}">
+                <a th:href="@{/admin}" th:aria-current="${ativo == 'painel'} ? 'page'">Painel</a>
+                <a th:href="@{/admin/anuncios}" th:aria-current="${ativo == 'anuncios'} ? 'page'">Anúncios</a>
+                <a th:href="@{/admin/usuarios}" th:aria-current="${ativo == 'usuarios'} ? 'page'">Usuários</a>
+                <a th:href="@{/admin/vendas}" th:aria-current="${ativo == 'vendas'} ? 'page'">Vendas</a>
+                <a th:href="@{/admin/comodidades}" th:aria-current="${ativo == 'comodidades'} ? 'page'">Comodidades</a>
+            </th:block>
+
+            <!-- Qualquer pessoa logada -->
+            <th:block th:if="${usuarioLogado != null}">
+                <span class="sep" aria-hidden="true"></span>
+                <a th:href="@{/conta}" th:aria-current="${ativo == 'conta'} ? 'page'">
+                    <span class="sr-only">Minha conta: </span><span th:text="${usuarioLogado.primeiroNome}">Nome</span>
+                </a>
+                <!-- O logout do Spring Security é POST (com token CSRF): por isso é um formulário. -->
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="link">Sair</button>
+                </form>
+            </th:block>
+        </nav>
+    </div>
+</header>
+
+<!-- ============================================================ AVISOS -->
+<!-- Mensagens que os controllers deixam como "flash": sucesso (verde) e erro (vermelho). -->
+<div class="container" th:fragment="avisos">
+    <p class="aviso aviso-sucesso" role="status" th:if="${sucesso != null}" th:text="${sucesso}">Tudo certo.</p>
+    <p class="aviso aviso-erro" role="alert" th:if="${erro != null}" th:text="${erro}">Algo deu errado.</p>
+</div>
+
+<!-- ============================================================ RODAPÉ -->
+<footer class="rodape" th:fragment="rodape">
+    <div class="container rodape-grade">
+        <div>
+            <a class="logo" th:href="@{/}">
+                <svg class="marca" viewBox="0 0 32 32" aria-hidden="true">
+                    <rect x="5" y="2" width="22" height="28" fill="#1d4ed8"/>
+                    <rect x="9" y="7" width="4" height="4" fill="#f2b705"/>
+                    <rect x="14" y="7" width="4" height="4" fill="#0e2a82"/>
+                    <rect x="19" y="7" width="4" height="4" fill="#0e2a82"/>
+                    <rect x="9" y="13" width="4" height="4" fill="#0e2a82"/>
+                    <rect x="14" y="13" width="4" height="4" fill="#0e2a82"/>
+                    <rect x="19" y="13" width="4" height="4" fill="#f2b705"/>
+                    <rect x="13" y="23" width="6" height="7" fill="#14202e"/>
+                </svg>
+                <span class="logo-nome">Andar Alto</span>
+            </a>
+            <p>Loja virtual de apartamentos. Projeto de estudo: todos os anúncios, pessoas e imagens são fictícios
+                e nenhum negócio real é fechado aqui.</p>
+        </div>
+        <ul>
+            <li><a th:href="@{/apartamentos}">Buscar apartamentos</a></li>
+            <li th:if="${usuarioLogado == null}"><a th:href="@{/cadastro(perfil=VENDEDOR)}">Anunciar meu apartamento</a></li>
+            <li th:if="${usuarioLogado == null}"><a th:href="@{/login}">Entrar</a></li>
+        </ul>
+    </div>
+</footer>
+
+<!-- ============================================================ SELO DE STATUS -->
+<!-- Serve para StatusAnuncio e StatusProposta: os dois enums têm "rotulo" e "css". -->
+<span class="selo" th:fragment="selo(s)" th:classappend="'selo-' + ${s.css}" th:text="${s.rotulo}">Status</span>
+
+<!-- ============================================================ CARTÃO DO IMÓVEL -->
+<!-- Usado na vitrine, na busca e nos favoritos. "favoritosIds" vem do controller. -->
+<article class="imovel" th:fragment="cartao(a)">
+    <!-- Coração: comprador alterna o favorito; visitante é levado ao login; vendedor/admin não veem. -->
+    <form class="coracao" method="post"
+          th:if="${usuarioLogado != null and usuarioLogado.comprador}"
+          th:action="@{/comprador/favoritos/{id}(id=${a.id})}"
+          th:with="fav=${favoritosIds != null and favoritosIds.contains(a.id)}">
+        <button type="submit" th:classappend="${fav} ? 'ativo'"
+                th:aria-pressed="${fav} ? 'true' : 'false'"
+                th:aria-label="${fav} ? 'Remover dos favoritos' : 'Salvar nos favoritos'">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.7 4.5 6.4 4.5c2.2 0 3.9 1.3 5.6 3.4 1.7-2.1 3.4-3.4 5.6-3.4 3.7 0 5.5 3.9 4 7.3C19.5 16.4 12 21 12 21z"/></svg>
+        </button>
+    </form>
+    <div class="coracao" th:if="${usuarioLogado == null}">
+        <a th:href="@{/login}" aria-label="Entre para salvar nos favoritos">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.7 4.5 6.4 4.5c2.2 0 3.9 1.3 5.6 3.4 1.7-2.1 3.4-3.4 5.6-3.4 3.7 0 5.5 3.9 4 7.3C19.5 16.4 12 21 12 21z"/></svg>
+        </a>
+    </div>
+
+    <div class="imovel-foto">
+        <img th:src="@{${a.capaUrl}}" alt="" width="640" height="480" loading="lazy">
+        <span class="andar-selo" th:if="${a.andar != null and a.andar > 0}" th:text="${a.andar} + 'º andar'">8º andar</span>
+    </div>
+
+    <div class="imovel-corpo">
+        <p th:if="${!a.publicado}" style="margin-bottom:0.5rem"><span th:replace="~{fragments/layout :: selo(${a.status})}"></span></p>
+        <p class="preco" th:text="${@fmt.moeda(a.preco)}">R$ 890.000</p>
+        <h3><a th:href="@{/apartamentos/{id}(id=${a.id})}" th:text="${a.titulo}">Título do anúncio</a></h3>
+        <p class="local" th:text="${a.localizacao}">Boa Viagem, Recife - PE</p>
+        <ul class="ficha">
+            <li><b th:text="${a.quartos}">3</b> <span th:text="${a.quartos == 1} ? 'quarto' : 'quartos'">quartos</span></li>
+            <li><b th:text="${a.areaM2}">98</b> m²</li>
+            <li><b th:text="${a.vagas}">2</b> <span th:text="${a.vagas == 1} ? 'vaga' : 'vagas'">vagas</span></li>
+        </ul>
+    </div>
+</article>
+
+</body>
+</html>
